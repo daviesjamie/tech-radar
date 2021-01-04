@@ -3,11 +3,24 @@
   "version": "2021.1.0",
   "description": "Visualising technology I know about",
   "private": true,
+  "scripts": {
+    "build": "webpack",
+    "start": "webpack serve --open"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/daviesjamie/tech-radar.git"
   },
   "author": "Jamie Davies",
   "license": "MIT",
-  "homepage": "https://github.com/jagd/tech-radar#readme"
+  "homepage": "https://github.com/jagd/tech-radar#readme",
+  "dependencies": {
+    "d3": "^6.3.1"
+  },
+  "devDependencies": {
+    "html-webpack-plugin": "^4.5.1",
+    "webpack": "^5.11.1",
+    "webpack-cli": "^4.3.1",
+    "webpack-dev-server": "^3.11.1"
+  }
 }
