@@ -1,0 +1,13 @@
+{
+  "name": "jagd-tech-radar",
+  "version": "2021.1.0",
+  "description": "Visualising technology I know about",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/daviesjamie/tech-radar.git"
+  },
+  "author": "Jamie Davies",
+  "license": "MIT",
+  "homepage": "https://github.com/jagd/tech-radar#readme"
+}
