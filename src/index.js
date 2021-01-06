@@ -1,4 +1,4 @@
-import radar from "./radar.js";
+import radar from "./radar";
 
 radar({
   colors: {

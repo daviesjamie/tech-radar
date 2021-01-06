@@ -1,17 +1,17 @@
 import * as d3 from "d3";
 
-export default function (config) {
-  var svg = d3
+export default function D3Radar(config) {
+  const svg = d3
     .select(`svg#${config.svgId}`)
     .style("background-color", config.colors.background)
     .attr("width", config.width)
     .attr("height", config.height);
 
-  var radar = svg
+  const radar = svg
     .append("g")
     .attr("transform", `translate(${config.width / 2}, ${config.height / 2})`);
 
-  var grid = radar.append("g");
+  const grid = radar.append("g");
   grid
     .append("line")
     .attr("x1", 0)
