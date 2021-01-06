@@ -1,11 +1,11 @@
-import radar from './radar.js';
+import radar from "./radar.js";
 
 radar({
   colors: {
-    background: '#eee',
-    grid: '#bbb',
+    background: "#eee",
+    grid: "#bbb",
   },
   height: 1000,
-  svgId: 'radar',
+  svgId: "radar",
   width: 1450,
 });
