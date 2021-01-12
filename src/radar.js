@@ -1,23 +1,17 @@
 import * as d3 from "d3";
 import "./radar.css";
+import { randomBetween, normalBetween } from "./random";
+import { toCartesian, toPolar } from "./coordinates";
+import { constrainToBox, constrainToRing } from "./constrain";
+
+const quadrantFactors = [
+  { radialMin:  0,    radialMax:  0.5, x:  1, y:  1 },
+  { radialMin:  0.5,  radialMax:  1,   x: -1, y:  1 },
+  { radialMin: -1,    radialMax: -0.5, x: -1, y: -1 },
+  { radialMin: -0.5,  radialMax:  0,   x:  1, y: -1 },
+];
 
 export default function D3Radar(config) {
-  function randomBetween(min, max) {
-    return min + Math.random() * (max - min);
-  }
-
-  function normalBetween(min, max) {
-    return min + (Math.random() + Math.random()) * 0.5 * (max - min);
-  }
-
-  // radial_min / radial_max are multiples of PI
-  const quadrants = [
-    { radial_min: 0, radial_max: 0.5, factor_x: 1, factor_y: 1 },
-    { radial_min: 0.5, radial_max: 1, factor_x: -1, factor_y: 1 },
-    { radial_min: -1, radial_max: -0.5, factor_x: -1, factor_y: -1 },
-    { radial_min: -0.5, radial_max: 0, factor_x: 1, factor_y: -1 },
-  ];
-
   const rings = [
     { radius: 130 },
     { radius: 220 },
@@ -34,69 +28,33 @@ export default function D3Radar(config) {
     { x: 450, y: -310 },
   ];
 
-  function toPolar(cartesian) {
-    const { x } = cartesian;
-    const { y } = cartesian;
-    return {
-      t: Math.atan2(y, x),
-      r: Math.sqrt(x * x + y * y),
-    };
-  }
-
-  function toCartesian(polar) {
-    return {
-      x: polar.r * Math.cos(polar.t),
-      y: polar.r * Math.sin(polar.t),
-    };
-  }
-
-  function boundedInterval(value, min, max) {
-    const low = Math.min(min, max);
-    const high = Math.max(min, max);
-    return Math.min(Math.max(value, low), high);
-  }
-
-  function boundedRing(polar, rMin, rMax) {
-    return {
-      t: polar.t,
-      r: boundedInterval(polar.r, rMin, rMax),
-    };
-  }
-
-  function boundedBox(point, min, max) {
-    return {
-      x: boundedInterval(point.x, min.x, max.x),
-      y: boundedInterval(point.y, min.y, max.y),
-    };
-  }
-
   function segment(quadrant, ring) {
     const polarMin = {
-      t: quadrants[quadrant].radial_min * Math.PI,
+      t: quadrantFactors[quadrant].radialMin * Math.PI,
       r: ring === 0 ? 30 : rings[ring - 1].radius,
     };
     const polarMax = {
-      t: quadrants[quadrant].radial_max * Math.PI,
+      t: quadrantFactors[quadrant].radialMax * Math.PI,
       r: rings[ring].radius,
     };
     const cartesianMin = {
-      x: 15 * quadrants[quadrant].factor_x,
-      y: 15 * quadrants[quadrant].factor_y,
+      x: 15 * quadrantFactors[quadrant].x,
+      y: 15 * quadrantFactors[quadrant].y,
     };
     const cartesianMax = {
-      x: rings[3].radius * quadrants[quadrant].factor_x,
-      y: rings[3].radius * quadrants[quadrant].factor_y,
+      x: rings[3].radius * quadrantFactors[quadrant].x,
+      y: rings[3].radius * quadrantFactors[quadrant].y,
     };
     return {
       clipx(d) {
-        const c = boundedBox(d, cartesianMin, cartesianMax);
-        const p = boundedRing(toPolar(c), polarMin.r + 15, polarMax.r - 15);
+        const c = constrainToBox(d, cartesianMin, cartesianMax);
+        const p = constrainToRing(toPolar(c), polarMin.r + 15, polarMax.r - 15);
         d.x = toCartesian(p).x; // adjust data too!
         return d.x;
       },
       clipy(d) {
-        const c = boundedBox(d, cartesianMin, cartesianMax);
-        const p = boundedRing(toPolar(c), polarMin.r + 15, polarMax.r - 15);
+        const c = constrainToBox(d, cartesianMin, cartesianMax);
+        const p = constrainToRing(toPolar(c), polarMin.r + 15, polarMax.r - 15);
         d.y = toCartesian(p).y; // adjust data too!
         return d.y;
       },
@@ -119,29 +77,25 @@ export default function D3Radar(config) {
   });
 
   // partition entries according to segments
-  const segmented = new Array(4);
-  for (var quadrant = 0; quadrant < 4; quadrant++) {
-    segmented[quadrant] = new Array(4);
-    for (var ring = 0; ring < 4; ring++) {
-      segmented[quadrant][ring] = [];
-    }
-  }
-  for (var i = 0; i < config.entries.length; i++) {
-    const entry = config.entries[i];
-    segmented[entry.quadrant][entry.ring].push(entry);
-  }
+  const segmented = config.entries.reduce((acc, entry) => {
+    acc[entry.quadrant] ||= {};
+    acc[entry.quadrant][entry.ring] ||= [];
+    acc[entry.quadrant][entry.ring].push(entry);
+    return acc;
+  }, {});
 
   // assign unique sequential id to each entry
   let id = 1;
-  for (var quadrant of [2, 3, 1, 0]) {
-    for (var ring = 0; ring < 4; ring++) {
+  [2, 3, 1, 0].forEach((quadrant) =>
+    [0, 1, 2, 3].forEach((ring) => {
       const entries = segmented[quadrant][ring];
       entries.sort((a, b) => a.label.localeCompare(b.label));
-      for (var i = 0; i < entries.length; i++) {
-        entries[i].id = `${id++}`;
-      }
-    }
-  }
+      entries.forEach((entry) => {
+        entry.id = id;
+        id += 1;
+      });
+    })
+  );
 
   function translate(x, y) {
     return `translate(${x},${y})`;
@@ -149,8 +103,8 @@ export default function D3Radar(config) {
 
   function viewbox(quadrant) {
     return [
-      Math.max(0, quadrants[quadrant].factor_x * 400) - 420,
-      Math.max(0, quadrants[quadrant].factor_y * 400) - 420,
+      Math.max(0, quadrantFactors[quadrant].x * 400) - 420,
+      Math.max(0, quadrantFactors[quadrant].y * 400) - 420,
       440,
       440,
     ].join(" ");
@@ -223,7 +177,8 @@ export default function D3Radar(config) {
 
   // legend
   const legend = radar.append("g");
-  for (var quadrant = 0; quadrant < 4; quadrant++) {
+  config.quadrants.forEach((_, quadrant) => {
+  // for (var quadrant = 0; quadrant < 4; quadrant++) {
     legend
       .append("text")
       .attr(
@@ -232,7 +187,8 @@ export default function D3Radar(config) {
       )
       .text(config.quadrants[quadrant].name)
       .classed("legend-title", true);
-    for (var ring = 0; ring < 4; ring++) {
+
+    config.rings.forEach((_, ring) => {
       legend
         .append("text")
         .attr("transform", legendTransform(quadrant, ring))
@@ -256,8 +212,8 @@ export default function D3Radar(config) {
           hideBubble(d);
           unhighlightLegendItem(d);
         });
-    }
-  }
+    });
+  });
 
   // layer for entries
   const rink = radar.append("g").attr("id", "rink");
@@ -339,17 +295,13 @@ export default function D3Radar(config) {
     blip.append("text").text(d.id).attr("y", 3).attr("text-anchor", "middle");
   });
 
-  // make sure that blips stay inside their segment
-  function ticked() {
-    blips.attr("transform", (d) =>
-      translate(d.segment.clipx(d), d.segment.clipy(d))
-    );
-  }
-
   // distribute blips, while avoiding collisions
   d3.forceSimulation()
     .nodes(config.entries)
     .velocityDecay(0.08) // magic number (found by experimentation)
     .force("collision", d3.forceCollide().radius(12).strength(0.85))
-    .on("tick", ticked);
+    .on("tick", () =>
+      blips.attr("transform", (d) =>
+        translate(d.segment.clipx(d), d.segment.clipy(d))));
+
 }
