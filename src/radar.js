@@ -24,16 +24,20 @@ export default function D3Radar(config) {
   const segments = Segments({ rings });
 
   // position each entry randomly in its segment
-  config.entries.forEach((entry) => {
-    entry.segment = segments(entry.quadrant, entry.ring);
-    const point = entry.segment.random();
-    entry.x = point.x;
-    entry.y = point.y;
-    entry.color = config.rings[entry.ring].color;
+  const entries = config.entries.map((entry) => {
+    const segment = segments(entry.quadrant, entry.ring);
+    const point = segment.random();
+    return {
+      ...entry,
+      color: config.rings[entry.ring].color,
+      segment,
+      x: point.x,
+      y: point.y,
+    };
   });
 
   // partition entries according to segments
-  const segmented = config.entries.reduce((acc, entry) => {
+  const segmentedEntries = entries.reduce((acc, entry) => {
     acc[entry.quadrant] ||= {};
     acc[entry.quadrant][entry.ring] ||= [];
     acc[entry.quadrant][entry.ring].push(entry);
@@ -42,28 +46,24 @@ export default function D3Radar(config) {
 
   // assign unique sequential id to each entry
   let id = 1;
-  [2, 3, 1, 0].forEach((quadrant) =>
-    [0, 1, 2, 3].forEach((ring) => {
-      const entries = segmented[quadrant][ring];
-      entries.sort((a, b) => a.label.localeCompare(b.label));
-      entries.forEach((entry) => {
-        entry.id = id;
-        id += 1;
-      });
-    })
+  const labelledEntries = {};
+  [
+    Quadrant.TOP_LEFT,
+    Quadrant.TOP_RIGHT,
+    Quadrant.BOTTOM_LEFT,
+    Quadrant.BOTTOM_RIGHT,
+  ].forEach(
+    (quadrant) =>
+      (labelledEntries[quadrant] = [0, 1, 2, 3].map((ring) => {
+        const segmentEntries = segmentedEntries[quadrant][ring];
+        segmentEntries.sort((a, b) => a.label.localeCompare(b.label));
+        // eslint-disable-next-line no-plusplus
+        return segmentEntries.map((entry) => ({ ...entry, id: id++ }));
+      }))
   );
 
   function translate(x, y) {
     return `translate(${x},${y})`;
-  }
-
-  function viewbox(quadrant) {
-    return [
-      Math.max(0, quadrantFactors[quadrant].x * 400) - 420,
-      Math.max(0, quadrantFactors[quadrant].y * 400) - 420,
-      440,
-      440,
-    ].join(" ");
   }
 
   const svg = d3
@@ -116,7 +116,7 @@ export default function D3Radar(config) {
     const dx = ring < 2 ? 0 : 140;
     let dy = index == null ? -16 : index * 12;
     if (ring % 2 === 1) {
-      dy = dy + 36 + segmented[quadrant][ring - 1].length * 12;
+      dy = dy + 36 + labelledEntries[quadrant][ring - 1].length * 12;
     }
     return translate(
       legendOffset[quadrant].x + dx,
@@ -134,7 +134,6 @@ export default function D3Radar(config) {
   // legend
   const legend = radar.append("g");
   config.quadrants.forEach((_, quadrant) => {
-    // for (var quadrant = 0; quadrant < 4; quadrant++) {
     legend
       .append("text")
       .attr(
@@ -152,7 +151,7 @@ export default function D3Radar(config) {
         .classed("legend-ring", true);
       legend
         .selectAll(`.legend${quadrant}${ring}`)
-        .data(segmented[quadrant][ring])
+        .data(labelledEntries[quadrant][ring])
         .enter()
         .append("text")
         .attr("transform", (d, i) => legendTransform(quadrant, ring, i))
@@ -227,7 +226,7 @@ export default function D3Radar(config) {
   // draw blips on radar
   const blips = rink
     .selectAll(".blip")
-    .data(config.entries)
+    .data(Object.values(labelledEntries).flat(2))
     .enter()
     .append("g")
     .attr("class", "blip")
@@ -253,7 +252,7 @@ export default function D3Radar(config) {
 
   // distribute blips, while avoiding collisions
   d3.forceSimulation()
-    .nodes(config.entries)
+    .nodes(Object.values(labelledEntries).flat(2))
     .velocityDecay(0.08) // magic number (found by experimentation)
     .force("collision", d3.forceCollide().radius(12).strength(0.85))
     .on("tick", () =>
