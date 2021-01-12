@@ -1,36 +1,31 @@
 import { constrainToBox, constrainToRing } from "./constrain";
 import { toCartesian, toPolar } from "./coordinates";
 import { normalBetween, randomBetween } from "./random";
-import { quadrantFactors } from "./quadrants";
+import { Quadrant } from "./quadrants";
 
 export default function segmenter({ rings }) {
+  const { radius } = rings[rings.length - 1];
 
   function segment(quadrant, ring) {
     const polarMin = {
-      t: quadrantFactors[quadrant].radialMin * Math.PI,
+      t: Quadrant.radialMin(quadrant),
       r: ring === 0 ? 30 : rings[ring - 1].radius,
     };
+
     const polarMax = {
-      t: quadrantFactors[quadrant].radialMax * Math.PI,
+      t: Quadrant.radialMax(quadrant),
       r: rings[ring].radius,
     };
-    const cartesianMin = {
-      x: 15 * quadrantFactors[quadrant].x,
-      y: 15 * quadrantFactors[quadrant].y,
-    };
-    const cartesianMax = {
-      x: rings[3].radius * quadrantFactors[quadrant].x,
-      y: rings[3].radius * quadrantFactors[quadrant].y,
-    };
+
     return {
       clipx(d) {
-        const c = constrainToBox(d, cartesianMin, cartesianMax);
+        const c = constrainToBox(d, Quadrant.cartesianMin(quadrant), Quadrant.cartesianMax(quadrant, radius));
         const p = constrainToRing(toPolar(c), polarMin.r + 15, polarMax.r - 15);
         d.x = toCartesian(p).x; // adjust data too!
         return d.x;
       },
       clipy(d) {
-        const c = constrainToBox(d, cartesianMin, cartesianMax);
+        const c = constrainToBox(d, Quadrant.cartesianMin(quadrant), Quadrant.cartesianMax(quadrant, radius));
         const p = constrainToRing(toPolar(c), polarMin.r + 15, polarMax.r - 15);
         d.y = toCartesian(p).y; // adjust data too!
         return d.y;
