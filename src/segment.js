@@ -3,7 +3,7 @@ import { toCartesian, toPolar } from "./coordinates";
 import { normalBetween, randomBetween } from "./random";
 import { Quadrant } from "./quadrants";
 
-export default function segmenter({ rings }) {
+export default function Segments({ rings }) {
   const { radius } = rings[rings.length - 1];
 
   function segment(quadrant, ring) {
@@ -19,13 +19,21 @@ export default function segmenter({ rings }) {
 
     return {
       clipx(d) {
-        const c = constrainToBox(d, Quadrant.cartesianMin(quadrant), Quadrant.cartesianMax(quadrant, radius));
+        const c = constrainToBox(
+          d,
+          Quadrant.cartesianMin(quadrant),
+          Quadrant.cartesianMax(quadrant, radius)
+        );
         const p = constrainToRing(toPolar(c), polarMin.r + 15, polarMax.r - 15);
         d.x = toCartesian(p).x; // adjust data too!
         return d.x;
       },
       clipy(d) {
-        const c = constrainToBox(d, Quadrant.cartesianMin(quadrant), Quadrant.cartesianMax(quadrant, radius));
+        const c = constrainToBox(
+          d,
+          Quadrant.cartesianMin(quadrant),
+          Quadrant.cartesianMax(quadrant, radius)
+        );
         const p = constrainToRing(toPolar(c), polarMin.r + 15, polarMax.r - 15);
         d.y = toCartesian(p).y; // adjust data too!
         return d.y;

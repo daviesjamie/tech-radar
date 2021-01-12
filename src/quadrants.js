@@ -5,6 +5,7 @@ export const Quadrant = {
   TOP_RIGHT: 3,
 };
 
+// prettier-ignore
 export const quadrantFactors = {
   [Quadrant.BOTTOM_RIGHT]: { radialMin:  0,   radialMax:  0.5, x:  1, y:  1 },
   [Quadrant.BOTTOM_LEFT]:  { radialMin:  0.5, radialMax:  1,   x: -1, y:  1 },
@@ -22,5 +23,7 @@ Quadrant.cartesianMin = (quadrant) => ({
   y: quadrantFactors[quadrant].y * 15,
 });
 
-Quadrant.radialMax = (quadrant) => quadrantFactors[quadrant].radialMax * Math.PI;
-Quadrant.radialMin = (quadrant) => quadrantFactors[quadrant].radialMin * Math.PI;
+Quadrant.radialMax = (quadrant) =>
+  quadrantFactors[quadrant].radialMax * Math.PI;
+Quadrant.radialMin = (quadrant) =>
+  quadrantFactors[quadrant].radialMin * Math.PI;

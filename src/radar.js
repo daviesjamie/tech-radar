@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import "./radar.css";
-import { quadrantFactors } from "./quadrants";
-import segmenter from "./segment";
+import { Quadrant, quadrantFactors } from "./quadrants";
+import Segments from "./segment";
 
 export default function D3Radar(config) {
   const rings = [
@@ -13,18 +13,19 @@ export default function D3Radar(config) {
 
   const titleOffset = { x: -675, y: -420 };
 
-  const legendOffset = [
-    { x: 450, y: 90 },
-    { x: -675, y: 90 },
-    { x: -675, y: -310 },
-    { x: 450, y: -310 },
-  ];
+  // prettier-ignore
+  const legendOffset = {
+    [Quadrant.BOTTOM_RIGHT]: { x: 450, y: 90 },
+    [Quadrant.BOTTOM_LEFT]:  { x: -675, y: 90 },
+    [Quadrant.TOP_LEFT]:     { x: -675, y: -310 },
+    [Quadrant.TOP_RIGHT]:    { x: 450, y: -310 },
+  };
 
-  const segment = segmenter({ rings });
+  const segments = Segments({ rings });
 
   // position each entry randomly in its segment
   config.entries.forEach((entry) => {
-    entry.segment = segment(entry.quadrant, entry.ring);
+    entry.segment = segments(entry.quadrant, entry.ring);
     const point = entry.segment.random();
     entry.x = point.x;
     entry.y = point.y;
@@ -133,7 +134,7 @@ export default function D3Radar(config) {
   // legend
   const legend = radar.append("g");
   config.quadrants.forEach((_, quadrant) => {
-  // for (var quadrant = 0; quadrant < 4; quadrant++) {
+    // for (var quadrant = 0; quadrant < 4; quadrant++) {
     legend
       .append("text")
       .attr(
@@ -257,6 +258,7 @@ export default function D3Radar(config) {
     .force("collision", d3.forceCollide().radius(12).strength(0.85))
     .on("tick", () =>
       blips.attr("transform", (d) =>
-        translate(d.segment.clipx(d), d.segment.clipy(d))));
-
+        translate(d.segment.clipx(d), d.segment.clipy(d))
+      )
+    );
 }
