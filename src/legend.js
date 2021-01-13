@@ -9,7 +9,22 @@ const legendOffsets = {
   [Quadrant.TOP_RIGHT]:    { x:  450, y: -310 },
 };
 
+const addFilter = (parent) => {
+  const filter = parent
+    .append("defs")
+    .append("filter")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("width", 1)
+    .attr("height", 1)
+    .attr("id", "solid");
+  filter.append("feFlood").attr("flood-color", "rgb(0, 0, 0, 0.8)");
+  filter.append("feComposite").attr("in", "SourceGraphic");
+  return filter;
+};
+
 export default function Legend({ parent, quadrants, rings, entries, bubble }) {
+  addFilter(parent);
   const legend = parent.append("g");
 
   legend.transform = (quadrant, ring, index = null) => {

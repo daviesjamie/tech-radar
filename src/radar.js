@@ -128,17 +128,6 @@ export default function D3Radar(config) {
     bubble,
   });
 
-  const filter = grid
-    .append("defs")
-    .append("filter")
-    .attr("x", 0)
-    .attr("y", 0)
-    .attr("width", 1)
-    .attr("height", 1)
-    .attr("id", "solid");
-  filter.append("feFlood").attr("flood-color", "rgb(0, 0, 0, 0.8)");
-  filter.append("feComposite").attr("in", "SourceGraphic");
-
   // draw blips on radar
   const blips = rink
     .selectAll(".blip")
@@ -159,10 +148,7 @@ export default function D3Radar(config) {
   // configure each blip
   blips.each(function drawBlip(d) {
     const blip = d3.select(this);
-
     blip.append("circle").attr("r", 9).attr("fill", d.color);
-
-    // blip text
     blip.append("text").text(d.id).attr("y", 3).attr("text-anchor", "middle");
   });
 
