@@ -1,7 +1,9 @@
 import * as d3 from "d3";
 import "./radar.css";
-import { Quadrant, quadrantFactors } from "./quadrants";
+import { Quadrant } from "./quadrants";
 import Segments from "./segment";
+import { translate } from "./coordinates";
+import Bubble from "./bubble";
 
 export default function D3Radar(config) {
   const rings = [
@@ -15,10 +17,10 @@ export default function D3Radar(config) {
 
   // prettier-ignore
   const legendOffset = {
-    [Quadrant.BOTTOM_RIGHT]: { x: 450, y: 90 },
-    [Quadrant.BOTTOM_LEFT]:  { x: -675, y: 90 },
+    [Quadrant.BOTTOM_RIGHT]: { x:  450, y:   90 },
+    [Quadrant.BOTTOM_LEFT]:  { x: -675, y:   90 },
     [Quadrant.TOP_LEFT]:     { x: -675, y: -310 },
-    [Quadrant.TOP_RIGHT]:    { x: 450, y: -310 },
+    [Quadrant.TOP_RIGHT]:    { x:  450, y: -310 },
   };
 
   const segments = Segments({ rings });
@@ -62,10 +64,6 @@ export default function D3Radar(config) {
       }))
   );
 
-  function translate(x, y) {
-    return `translate(${x},${y})`;
-  }
-
   const svg = d3
     .select(`svg#${config.svg_id}`)
     .attr("width", config.width)
@@ -74,7 +72,10 @@ export default function D3Radar(config) {
 
   const radar = svg
     .append("g")
-    .attr("transform", translate(config.width / 2, config.height / 2));
+    .attr(
+      "transform",
+      translate({ x: config.width / 2, y: config.height / 2 })
+    );
 
   const grid = radar.append("g");
 
@@ -118,18 +119,24 @@ export default function D3Radar(config) {
     if (ring % 2 === 1) {
       dy = dy + 36 + labelledEntries[quadrant][ring - 1].length * 12;
     }
-    return translate(
-      legendOffset[quadrant].x + dx,
-      legendOffset[quadrant].y + dy
-    );
+    return translate({
+      x: legendOffset[quadrant].x + dx,
+      y: legendOffset[quadrant].y + dy,
+    });
   }
 
   // title
   radar
     .append("text")
-    .attr("transform", translate(titleOffset.x, titleOffset.y))
+    .attr("transform", translate({ x: titleOffset.x, y: titleOffset.y }))
     .text(config.title)
     .classed("title", true);
+
+  // layer for entries
+  const rink = radar.append("g").attr("id", "rink");
+
+  // rollover bubble (on top of everything else)
+  const bubble = Bubble(radar);
 
   // legend
   const legend = radar.append("g");
@@ -138,7 +145,10 @@ export default function D3Radar(config) {
       .append("text")
       .attr(
         "transform",
-        translate(legendOffset[quadrant].x, legendOffset[quadrant].y - 45)
+        translate({
+          x: legendOffset[quadrant].x,
+          y: legendOffset[quadrant].y - 45,
+        })
       )
       .text(config.quadrants[quadrant].name)
       .classed("legend-title", true);
@@ -160,56 +170,15 @@ export default function D3Radar(config) {
         .attr("id", (d, i) => `legendItem${d.id}`)
         .text((d, i) => `${d.id}. ${d.label}`)
         .on("mouseover", (event, d) => {
-          showBubble(d);
+          bubble.show(d);
           highlightLegendItem(d);
         })
         .on("mouseout", (event, d) => {
-          hideBubble(d);
+          bubble.hide();
           unhighlightLegendItem(d);
         });
     });
   });
-
-  // layer for entries
-  const rink = radar.append("g").attr("id", "rink");
-
-  // rollover bubble (on top of everything else)
-  const bubble = radar
-    .append("g")
-    .attr("id", "bubble")
-    .attr("x", 0)
-    .attr("y", 0)
-    .style("opacity", 0)
-    .style("pointer-events", "none")
-    .style("user-select", "none");
-  bubble.append("rect").attr("rx", 4).attr("ry", 4).style("fill", "#333");
-  bubble
-    .append("text")
-    .style("font-family", "sans-serif")
-    .style("font-size", "10px")
-    .style("fill", "#fff");
-  bubble.append("path").attr("d", "M 0,0 10,0 5,8 z").style("fill", "#333");
-
-  function showBubble(d) {
-    const tooltip = d3.select("#bubble text").text(d.label);
-    const bbox = tooltip.node().getBBox();
-    d3.select("#bubble")
-      .attr("transform", translate(d.x - bbox.width / 2, d.y - 16))
-      .style("opacity", 0.8);
-    d3.select("#bubble rect")
-      .attr("x", -5)
-      .attr("y", -bbox.height)
-      .attr("width", bbox.width + 10)
-      .attr("height", bbox.height + 4);
-    d3.select("#bubble path").attr(
-      "transform",
-      translate(bbox.width / 2 - 5, 3)
-    );
-  }
-
-  function hideBubble(d) {
-    d3.select("#bubble").attr("transform", translate(0, 0)).style("opacity", 0);
-  }
 
   const filter = grid
     .append("defs")
@@ -241,11 +210,11 @@ export default function D3Radar(config) {
     .attr("class", "blip")
     .attr("transform", (d, i) => legendTransform(d.quadrant, d.ring, i))
     .on("mouseover", (event, d) => {
-      showBubble(d);
+      bubble.show(d);
       highlightLegendItem(d);
     })
     .on("mouseout", (event, d) => {
-      hideBubble(d);
+      bubble.hide();
       unhighlightLegendItem(d);
     });
 
@@ -266,7 +235,7 @@ export default function D3Radar(config) {
     .force("collision", d3.forceCollide().radius(12).strength(0.85))
     .on("tick", () =>
       blips.attr("transform", (d) =>
-        translate(d.segment.clipx(d), d.segment.clipy(d))
+        translate({ x: d.segment.clipx(d), y: d.segment.clipy(d) })
       )
     );
 }

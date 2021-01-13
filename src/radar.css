@@ -40,3 +40,20 @@
   pointer-events: none;
   user-select: none;
 }
+
+.d3-radar .bubble {
+  opacity: 0.8;
+  pointer-events: none;
+  user-select: none;
+}
+
+.d3-radar .bubble rect,
+.d3-radar .bubble path {
+  fill: #333;
+}
+
+.d3-radar .bubble text {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  fill: #fff;
+}

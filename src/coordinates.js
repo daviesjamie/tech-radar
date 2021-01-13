@@ -13,3 +13,7 @@ export function toPolar(cartesian) {
     r: Math.sqrt(x * x + y * y),
   };
 }
+
+export function translate({ x, y }) {
+  return `translate(${x}, ${y})`;
+}
