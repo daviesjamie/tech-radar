@@ -4,6 +4,7 @@ import { Quadrant } from "./quadrants";
 import Segments from "./segment";
 import { translate } from "./coordinates";
 import Bubble from "./bubble";
+import Legend from "./legend";
 
 export default function D3Radar(config) {
   const rings = [
@@ -14,14 +15,6 @@ export default function D3Radar(config) {
   ];
 
   const titleOffset = { x: -675, y: -420 };
-
-  // prettier-ignore
-  const legendOffset = {
-    [Quadrant.BOTTOM_RIGHT]: { x:  450, y:   90 },
-    [Quadrant.BOTTOM_LEFT]:  { x: -675, y:   90 },
-    [Quadrant.TOP_LEFT]:     { x: -675, y: -310 },
-    [Quadrant.TOP_RIGHT]:    { x:  450, y: -310 },
-  };
 
   const segments = Segments({ rings });
 
@@ -113,18 +106,6 @@ export default function D3Radar(config) {
       .classed("ring-label", true);
   });
 
-  function legendTransform(quadrant, ring, index = null) {
-    const dx = ring < 2 ? 0 : 140;
-    let dy = index == null ? -16 : index * 12;
-    if (ring % 2 === 1) {
-      dy = dy + 36 + labelledEntries[quadrant][ring - 1].length * 12;
-    }
-    return translate({
-      x: legendOffset[quadrant].x + dx,
-      y: legendOffset[quadrant].y + dy,
-    });
-  }
-
   // title
   radar
     .append("text")
@@ -139,45 +120,12 @@ export default function D3Radar(config) {
   const bubble = Bubble(radar);
 
   // legend
-  const legend = radar.append("g");
-  config.quadrants.forEach((_, quadrant) => {
-    legend
-      .append("text")
-      .attr(
-        "transform",
-        translate({
-          x: legendOffset[quadrant].x,
-          y: legendOffset[quadrant].y - 45,
-        })
-      )
-      .text(config.quadrants[quadrant].name)
-      .classed("legend-title", true);
-
-    config.rings.forEach((_, ring) => {
-      legend
-        .append("text")
-        .attr("transform", legendTransform(quadrant, ring))
-        .text(config.rings[ring].name)
-        .classed("legend-ring", true);
-      legend
-        .selectAll(`.legend${quadrant}${ring}`)
-        .data(labelledEntries[quadrant][ring])
-        .enter()
-        .append("text")
-        .attr("transform", (d, i) => legendTransform(quadrant, ring, i))
-        .attr("class", `legend${quadrant}${ring}`)
-        .classed("legend-item", true)
-        .attr("id", (d, i) => `legendItem${d.id}`)
-        .text((d, i) => `${d.id}. ${d.label}`)
-        .on("mouseover", (event, d) => {
-          bubble.show(d);
-          highlightLegendItem(d);
-        })
-        .on("mouseout", (event, d) => {
-          bubble.hide();
-          unhighlightLegendItem(d);
-        });
-    });
+  const legend = Legend({
+    parent: radar,
+    quadrants: config.quadrants,
+    rings: config.rings,
+    entries: labelledEntries,
+    bubble,
   });
 
   const filter = grid
@@ -191,16 +139,6 @@ export default function D3Radar(config) {
   filter.append("feFlood").attr("flood-color", "rgb(0, 0, 0, 0.8)");
   filter.append("feComposite").attr("in", "SourceGraphic");
 
-  function highlightLegendItem(d) {
-    d3.select(`#legendItem${d.id}`)
-      .attr("filter", "url(#solid)")
-      .attr("fill", "white");
-  }
-
-  function unhighlightLegendItem(d) {
-    d3.select(`#legendItem${d.id}`).attr("filter", null).attr("fill", null);
-  }
-
   // draw blips on radar
   const blips = rink
     .selectAll(".blip")
@@ -208,14 +146,14 @@ export default function D3Radar(config) {
     .enter()
     .append("g")
     .attr("class", "blip")
-    .attr("transform", (d, i) => legendTransform(d.quadrant, d.ring, i))
+    .attr("transform", (d, i) => legend.transform(d.quadrant, d.ring, i))
     .on("mouseover", (event, d) => {
       bubble.show(d);
-      highlightLegendItem(d);
+      legend.highlight(d);
     })
     .on("mouseout", (event, d) => {
       bubble.hide();
-      unhighlightLegendItem(d);
+      legend.unhighlight(d);
     });
 
   // configure each blip

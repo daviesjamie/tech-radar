@@ -1,0 +1,77 @@
+import { Quadrant } from "./quadrants";
+import { translate } from "./coordinates";
+
+// prettier-ignore
+const legendOffsets = {
+  [Quadrant.BOTTOM_RIGHT]: { x:  450, y:   90 },
+  [Quadrant.BOTTOM_LEFT]:  { x: -675, y:   90 },
+  [Quadrant.TOP_LEFT]:     { x: -675, y: -310 },
+  [Quadrant.TOP_RIGHT]:    { x:  450, y: -310 },
+};
+
+export default function Legend({ parent, quadrants, rings, entries, bubble }) {
+  const legend = parent.append("g");
+
+  legend.transform = (quadrant, ring, index = null) => {
+    const dx = ring < 2 ? 0 : 140;
+    let dy = index == null ? -16 : index * 12;
+    if (ring % 2 === 1) {
+      dy = dy + 36 + entries[quadrant][ring - 1].length * 12;
+    }
+    return translate({
+      x: legendOffsets[quadrant].x + dx,
+      y: legendOffsets[quadrant].y + dy,
+    });
+  };
+
+  legend.highlight = (d) =>
+    parent
+      .select(`#legendItem${d.id}`)
+      .attr("filter", "url(#solid)")
+      .attr("fill", "white");
+
+  legend.unhighlight = (d) =>
+    parent.select(`#legendItem${d.id}`).attr("filter", null).attr("fill", null);
+
+  quadrants.forEach((_, quadrant) => {
+    legend
+      .append("text")
+      .attr(
+        "transform",
+        translate({
+          x: legendOffsets[quadrant].x,
+          y: legendOffsets[quadrant].y - 45,
+        })
+      )
+      .text(quadrants[quadrant].name)
+      .classed("legend-title", true);
+
+    rings.forEach((_, ring) => {
+      legend
+        .append("text")
+        .attr("transform", legend.transform(quadrant, ring))
+        .text(rings[ring].name)
+        .classed("legend-ring", true);
+      legend
+        .selectAll(`.legend${quadrant}${ring}`)
+        .data(entries[quadrant][ring])
+        .enter()
+        .append("text")
+        .attr("transform", (d, i) => legend.transform(quadrant, ring, i))
+        .attr("class", `legend${quadrant}${ring}`)
+        .classed("legend-item", true)
+        .attr("id", (d) => `legendItem${d.id}`)
+        .text((d) => `${d.id}. ${d.label}`)
+        .on("mouseover", (event, d) => {
+          bubble.show(d);
+          legend.highlight(d);
+        })
+        .on("mouseout", (event, d) => {
+          bubble.hide();
+          legend.unhighlight(d);
+        });
+    });
+  });
+
+  return legend;
+}
