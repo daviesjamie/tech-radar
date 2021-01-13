@@ -155,15 +155,15 @@ export default function D3Radar(config) {
         .enter()
         .append("text")
         .attr("transform", (d, i) => legendTransform(quadrant, ring, i))
-        // .attr("class", `legend${quadrant}${ring}`)
+        .attr("class", `legend${quadrant}${ring}`)
         .classed("legend-item", true)
         .attr("id", (d, i) => `legendItem${d.id}`)
         .text((d, i) => `${d.id}. ${d.label}`)
-        .on("mouseover", (d) => {
+        .on("mouseover", (event, d) => {
           showBubble(d);
           highlightLegendItem(d);
         })
-        .on("mouseout", (d) => {
+        .on("mouseout", (event, d) => {
           hideBubble(d);
           unhighlightLegendItem(d);
         });
@@ -211,16 +211,25 @@ export default function D3Radar(config) {
     d3.select("#bubble").attr("transform", translate(0, 0)).style("opacity", 0);
   }
 
+  const filter = grid
+    .append("defs")
+    .append("filter")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("width", 1)
+    .attr("height", 1)
+    .attr("id", "solid");
+  filter.append("feFlood").attr("flood-color", "rgb(0, 0, 0, 0.8)");
+  filter.append("feComposite").attr("in", "SourceGraphic");
+
   function highlightLegendItem(d) {
-    const legendItem = document.getElementById(`legendItem${d.id}`);
-    legendItem.setAttribute("filter", "url(#solid)");
-    legendItem.setAttribute("fill", "white");
+    d3.select(`#legendItem${d.id}`)
+      .attr("filter", "url(#solid)")
+      .attr("fill", "white");
   }
 
   function unhighlightLegendItem(d) {
-    const legendItem = document.getElementById(`legendItem${d.id}`);
-    legendItem.removeAttribute("filter");
-    legendItem.removeAttribute("fill");
+    d3.select(`#legendItem${d.id}`).attr("filter", null).attr("fill", null);
   }
 
   // draw blips on radar
@@ -231,17 +240,17 @@ export default function D3Radar(config) {
     .append("g")
     .attr("class", "blip")
     .attr("transform", (d, i) => legendTransform(d.quadrant, d.ring, i))
-    .on("mouseover", (d) => {
+    .on("mouseover", (event, d) => {
       showBubble(d);
       highlightLegendItem(d);
     })
-    .on("mouseout", (d) => {
+    .on("mouseout", (event, d) => {
       hideBubble(d);
       unhighlightLegendItem(d);
     });
 
   // configure each blip
-  blips.each(function (d) {
+  blips.each(function drawBlip(d) {
     const blip = d3.select(this);
 
     blip.append("circle").attr("r", 9).attr("fill", d.color);
