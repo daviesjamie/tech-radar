@@ -1,10 +1,12 @@
 import * as d3 from "d3";
-import "./radar.css";
+
+import Bubble from "./bubble";
+import { translate } from "./coordinates";
+import Legend from "./legend";
 import { Quadrant } from "./quadrants";
 import Segments from "./segment";
-import { translate } from "./coordinates";
-import Bubble from "./bubble";
-import Legend from "./legend";
+
+import "./radar.css";
 
 export default function D3Radar(config) {
   const rings = [

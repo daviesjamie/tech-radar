@@ -1,7 +1,7 @@
 import { constrainToBox, constrainToRing } from "./constrain";
 import { toCartesian, toPolar } from "./coordinates";
-import { normalBetween, randomBetween } from "./random";
 import { Quadrant } from "./quadrants";
+import { normalBetween, randomBetween } from "./random";
 
 export default function Segments({ rings }) {
   const { radius } = rings[rings.length - 1];

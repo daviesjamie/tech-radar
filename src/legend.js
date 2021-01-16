@@ -1,5 +1,5 @@
-import { Quadrant } from "./quadrants";
 import { translate } from "./coordinates";
+import { Quadrant } from "./quadrants";
 
 // prettier-ignore
 const legendOffsets = {
