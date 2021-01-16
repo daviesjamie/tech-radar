@@ -48,32 +48,32 @@ export default function Legend({ parent, quadrants, rings, entries, bubble }) {
   legend.unhighlight = (d) =>
     parent.select(`#legendItem${d.id}`).attr("filter", null).attr("fill", null);
 
-  quadrants.forEach((_, quadrant) => {
+  quadrants.forEach((quadrant, quadrantIndex) => {
     legend
       .append("text")
       .attr(
         "transform",
         translate({
-          x: legendOffsets[quadrant].x,
-          y: legendOffsets[quadrant].y - 45,
+          x: legendOffsets[quadrantIndex].x,
+          y: legendOffsets[quadrantIndex].y - 45,
         })
       )
-      .text(quadrants[quadrant].name)
+      .text(quadrant.name)
       .classed("legend-title", true);
 
-    rings.forEach((_, ring) => {
+    rings.forEach((ring, ringIndex) => {
       legend
         .append("text")
-        .attr("transform", legend.transform(quadrant, ring))
-        .text(rings[ring].name)
+        .attr("transform", legend.transform(quadrantIndex, ringIndex))
+        .text(ring.name)
         .classed("legend-ring", true);
       legend
-        .selectAll(`.legend${quadrant}${ring}`)
-        .data(entries[quadrant][ring])
+        .selectAll(`.legend${quadrantIndex}${ringIndex}`)
+        .data(entries[quadrantIndex][ringIndex])
         .enter()
         .append("text")
-        .attr("transform", (d, i) => legend.transform(quadrant, ring, i))
-        .attr("class", `legend${quadrant}${ring}`)
+        .attr("transform", (d, i) => legend.transform(quadrantIndex, ringIndex, i))
+        .attr("class", `legend${quadrantIndex}${ringIndex}`)
         .classed("legend-item", true)
         .attr("id", (d) => `legendItem${d.id}`)
         .text((d) => `${d.id}. ${d.label}`)
