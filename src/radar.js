@@ -10,6 +10,7 @@ import "./radar.css";
 
 export default function D3Radar(params) {
   const config = {
+    blipRadius: 10,
     height: 1000,
     minRadius: 130,
     maxRadius: 400,
@@ -19,7 +20,7 @@ export default function D3Radar(params) {
   };
 
   const rings = computeRings(config);
-  const entries = computeEntries({ entries: config.entries, rings });
+  const entries = computeEntries({ ...config, rings });
 
   const svg = config.svgId
     ? d3.select(`#${config.svgId}`)
@@ -74,7 +75,7 @@ export default function D3Radar(params) {
   blips.each(function drawBlip(d) {
     const blip = d3.select(this);
     blip.attr("opacity", d.opacity);
-    blip.append("circle").attr("r", 9).attr("fill", d.color);
+    blip.append("circle").attr("r", config.blipRadius).attr("fill", d.color);
     blip.append("text").text(d.id).attr("y", 3).attr("text-anchor", "middle");
   });
 

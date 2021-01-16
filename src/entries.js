@@ -33,7 +33,7 @@ export function segmentEntries(entries) {
   }, {});
 }
 
-export function computeEntries({ entries, rings }) {
+export function computeEntries({ entries, quadrants, rings }) {
   const segmentedEntries = segmentEntries(entries);
   const labelledEntries = numberEntries(segmentedEntries);
   const segments = Segments({ rings });
@@ -42,12 +42,13 @@ export function computeEntries({ entries, rings }) {
     .flat(2)
     .map((entry) => {
       const ring = rings[entry.ring];
+      const quadrant = quadrants[entry.quadrant];
       const segment = segments(entry.quadrant, entry.ring);
       const point = segment.random();
 
       return {
-        color: ring.color || "#000",
-        opacity: ring.opacity || 1,
+        color: quadrant.color || ring.color || "#000",
+        opacity: quadrant.opacity || ring.opacity || 1,
         segment,
         ...point,
         ...entry,
