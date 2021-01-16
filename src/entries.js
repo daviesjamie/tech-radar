@@ -1,7 +1,7 @@
 import { Quadrant } from "./quadrants";
 import Segments from "./segments";
 
-export function numberEntries(segmentedEntries, start = 1) {
+export function numberEntries(segmentedEntries, rings, start = 1) {
   const labelOrder = [
     Quadrant.TOP_LEFT,
     Quadrant.BOTTOM_LEFT,
@@ -13,7 +13,7 @@ export function numberEntries(segmentedEntries, start = 1) {
   const labelledEntries = {};
 
   labelOrder.forEach((quadrant) => {
-    labelledEntries[quadrant] = [0, 1, 2, 3].map((ring) => {
+    labelledEntries[quadrant] = rings.map((_, ring) => {
       const entries = segmentedEntries[quadrant][ring];
       entries.sort((a, b) => a.label.localeCompare(b.label));
       // eslint-disable-next-line no-plusplus
@@ -35,7 +35,7 @@ export function segmentEntries(entries) {
 
 export function computeEntries({ entries, quadrants, rings }) {
   const segmentedEntries = segmentEntries(entries);
-  const labelledEntries = numberEntries(segmentedEntries);
+  const labelledEntries = numberEntries(segmentedEntries, rings);
   const segments = Segments({ rings });
 
   return Object.values(labelledEntries)

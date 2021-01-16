@@ -7,16 +7,15 @@ radar({
   height: 1000,
   title: "Jamie's Tech Radar — 2021.01",
   quadrants: [
-    { name: "Languages", color: "#ab4642" },
-    { name: "Infrastructure", color: "#f7ca88" },
-    { name: "Frameworks", color: "#a1b56c" },
-    { name: "Data Management", color: "#7cafc2" },
+    { name: "Tools & Software", color: "#ab4642" },
+    { name: "Data Management", color: "#f7ca88" },
+    { name: "Infrastructure & Monitoring", color: "#a1b56c" },
+    { name: "Languages & Frameworks", color: "#7cafc2" },
   ],
   rings: [
-    { name: "ADOPT", opacity: 1 },
-    { name: "TRIAL", opacity: 0.75 },
-    { name: "ASSESS", opacity: 0.5 },
-    { name: "HOLD", opacity: 0.4 },
+    { name: "Advanced", opacity: 1 },
+    { name: "Intermediate", opacity: 0.75 },
+    { name: "Beginner", opacity: 0.5 },
   ],
   entries,
 });
