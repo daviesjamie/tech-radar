@@ -38,20 +38,15 @@ export default function D3Radar(params) {
 
   drawGrid(radar, rings);
 
-  // title
   radar
     .append("text")
     .attr("transform", translate(config.titleOffset))
     .text(config.title)
     .classed("title", true);
 
-  // layer for entries
   const rink = radar.append("g").attr("id", "rink");
-
-  // rollover bubble (on top of everything else)
   const bubble = Bubble(radar);
 
-  // legend
   const legend = Legend({
     ...config,
     bubble,
@@ -60,7 +55,6 @@ export default function D3Radar(params) {
     rings,
   });
 
-  // draw blips on radar
   const blips = rink
     .selectAll(".blip")
     .data(entries)

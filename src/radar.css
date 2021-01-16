@@ -34,6 +34,16 @@
   font-size: 11px;
 }
 
+.d3-radar .legend-item.legend-highlight {
+  fill: #fff;
+  filter: url("#legend-highlight-filter");
+}
+
+#legend-highlight-filter feFlood {
+  flood-color: #000;
+  flood-opacity: 0.8;
+}
+
 .d3-radar .blip text {
   fill: #fff;
   font-size: 9px;
