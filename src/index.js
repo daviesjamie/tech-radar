@@ -1,7 +1,7 @@
 import radar from "./radar";
 
 radar({
-  svg_id: "radar",
+  svgId: "radar",
   width: 1450,
   height: 1000,
   title: "Jamie's Tech Radar — 2021.01",

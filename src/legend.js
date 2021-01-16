@@ -72,7 +72,9 @@ export default function Legend({ parent, quadrants, rings, entries, bubble }) {
         .data(entries[quadrantIndex][ringIndex])
         .enter()
         .append("text")
-        .attr("transform", (d, i) => legend.transform(quadrantIndex, ringIndex, i))
+        .attr("transform", (d, i) =>
+          legend.transform(quadrantIndex, ringIndex, i)
+        )
         .attr("class", `legend${quadrantIndex}${ringIndex}`)
         .classed("legend-item", true)
         .attr("id", (d) => `legendItem${d.id}`)

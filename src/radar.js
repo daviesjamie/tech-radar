@@ -2,22 +2,28 @@ import * as d3 from "d3";
 
 import Bubble from "./bubble";
 import { translate } from "./coordinates";
+import { calculateRingSizes, drawGrid } from "./grid";
 import Legend from "./legend";
 import { Quadrant } from "./quadrants";
 import Segments from "./segment";
 
 import "./radar.css";
 
-export default function D3Radar(config) {
-  const rings = [
-    { radius: 130 },
-    { radius: 220 },
-    { radius: 310 },
-    { radius: 400 },
-  ];
+export default function D3Radar(options) {
+  const config = {
+    height: 1000,
+    minRingRadius: 130,
+    maxRingRadius: 400,
+    titleOffset: { x: -675, y: -420 },
+    width: 1450,
+    ...options,
+  };
 
-  const titleOffset = { x: -675, y: -420 };
-
+  const rings = calculateRingSizes(
+    config.minRingRadius,
+    config.maxRingRadius,
+    config.rings
+  );
   const segments = Segments({ rings });
 
   // position each entry randomly in its segment
@@ -58,8 +64,10 @@ export default function D3Radar(config) {
     });
   });
 
-  const svg = d3
-    .select(`svg#${config.svg_id}`)
+  const svg = config.svgId
+    ? d3.select(`#${config.svgId}`)
+    : d3.select("body").append("svg");
+  svg
     .attr("width", config.width)
     .attr("height", config.height)
     .classed("d3-radar", true);
@@ -71,46 +79,12 @@ export default function D3Radar(config) {
       translate({ x: config.width / 2, y: config.height / 2 })
     );
 
-  const grid = radar.append("g");
-
-  // draw grid lines
-  grid
-    .append("line")
-    .attr("x1", 0)
-    .attr("y1", -400)
-    .attr("x2", 0)
-    .attr("y2", 400)
-    .classed("grid", true);
-
-  grid
-    .append("line")
-    .attr("x1", -400)
-    .attr("y1", 0)
-    .attr("x2", 400)
-    .attr("y2", 0)
-    .classed("grid", true);
-
-  // draw rings
-  rings.forEach((ring, i) => {
-    grid
-      .append("circle")
-      .attr("cx", 0)
-      .attr("cy", 0)
-      .attr("r", ring.radius)
-      .classed("grid", true);
-
-    grid
-      .append("text")
-      .text(config.rings[i].name)
-      .attr("y", -ring.radius + 62)
-      .attr("text-anchor", "middle")
-      .classed("ring-label", true);
-  });
+  drawGrid(radar, rings);
 
   // title
   radar
     .append("text")
-    .attr("transform", translate({ x: titleOffset.x, y: titleOffset.y }))
+    .attr("transform", translate(config.titleOffset))
     .text(config.title)
     .classed("title", true);
 
