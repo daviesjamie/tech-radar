@@ -9,21 +9,22 @@ import Segments from "./segment";
 
 import "./radar.css";
 
-export default function D3Radar(options) {
-  const config = {
+export default function D3Radar(config) {
+  const options = {
     height: 1000,
     minRingRadius: 130,
     maxRingRadius: 400,
     titleOffset: { x: -675, y: -420 },
     width: 1450,
-    ...options,
+    ...config,
   };
 
   const rings = calculateRingSizes(
-    config.minRingRadius,
-    config.maxRingRadius,
+    options.minRingRadius,
+    options.maxRingRadius,
     config.rings
   );
+
   const segments = Segments({ rings });
 
   // position each entry randomly in its segment
@@ -64,19 +65,19 @@ export default function D3Radar(options) {
     });
   });
 
-  const svg = config.svgId
-    ? d3.select(`#${config.svgId}`)
+  const svg = options.svgId
+    ? d3.select(`#${options.svgId}`)
     : d3.select("body").append("svg");
   svg
-    .attr("width", config.width)
-    .attr("height", config.height)
+    .attr("width", options.width)
+    .attr("height", options.height)
     .classed("d3-radar", true);
 
   const radar = svg
     .append("g")
     .attr(
       "transform",
-      translate({ x: config.width / 2, y: config.height / 2 })
+      translate({ x: options.width / 2, y: options.height / 2 })
     );
 
   drawGrid(radar, rings);
@@ -84,8 +85,8 @@ export default function D3Radar(options) {
   // title
   radar
     .append("text")
-    .attr("transform", translate(config.titleOffset))
-    .text(config.title)
+    .attr("transform", translate(options.titleOffset))
+    .text(options.title)
     .classed("title", true);
 
   // layer for entries
@@ -98,7 +99,7 @@ export default function D3Radar(options) {
   const legend = Legend({
     parent: radar,
     quadrants: config.quadrants,
-    rings: config.rings,
+    rings,
     entries: labelledEntries,
     bubble,
   });
