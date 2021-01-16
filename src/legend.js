@@ -1,13 +1,6 @@
 import { translate } from "./coordinates";
+import { segmentEntries } from "./entries";
 import { Quadrant } from "./quadrants";
-
-// prettier-ignore
-const legendOffsets = {
-  [Quadrant.BOTTOM_RIGHT]: { x:  450, y:   90 },
-  [Quadrant.BOTTOM_LEFT]:  { x: -675, y:   90 },
-  [Quadrant.TOP_LEFT]:     { x: -675, y: -310 },
-  [Quadrant.TOP_RIGHT]:    { x:  450, y: -310 },
-};
 
 const addFilter = (parent) => {
   const filter = parent
@@ -23,7 +16,25 @@ const addFilter = (parent) => {
   return filter;
 };
 
-export default function Legend({ parent, quadrants, rings, entries, bubble }) {
+export default function Legend({
+  bubble,
+  entries,
+  legendOffsets,
+  parent,
+  quadrants,
+  rings,
+}) {
+  const segmentedEntries = segmentEntries(entries);
+
+  // prettier-ignore
+  const offsets = {
+    [Quadrant.BOTTOM_RIGHT]: { x:  450, y:   90 },
+    [Quadrant.BOTTOM_LEFT]:  { x: -675, y:   90 },
+    [Quadrant.TOP_LEFT]:     { x: -675, y: -310 },
+    [Quadrant.TOP_RIGHT]:    { x:  450, y: -310 },
+    ...legendOffsets,
+  };
+
   addFilter(parent);
   const legend = parent.append("g");
 
@@ -31,11 +42,11 @@ export default function Legend({ parent, quadrants, rings, entries, bubble }) {
     const dx = ring < 2 ? 0 : 140;
     let dy = index == null ? -16 : index * 12;
     if (ring % 2 === 1) {
-      dy = dy + 36 + entries[quadrant][ring - 1].length * 12;
+      dy = dy + 36 + segmentedEntries[quadrant][ring - 1].length * 12;
     }
     return translate({
-      x: legendOffsets[quadrant].x + dx,
-      y: legendOffsets[quadrant].y + dy,
+      x: offsets[quadrant].x + dx,
+      y: offsets[quadrant].y + dy,
     });
   };
 
@@ -54,8 +65,8 @@ export default function Legend({ parent, quadrants, rings, entries, bubble }) {
       .attr(
         "transform",
         translate({
-          x: legendOffsets[quadrantIndex].x,
-          y: legendOffsets[quadrantIndex].y - 45,
+          x: offsets[quadrantIndex].x,
+          y: offsets[quadrantIndex].y - 45,
         })
       )
       .text(quadrant.name)
@@ -69,7 +80,7 @@ export default function Legend({ parent, quadrants, rings, entries, bubble }) {
         .classed("legend-ring", true);
       legend
         .selectAll(`.legend${quadrantIndex}${ringIndex}`)
-        .data(entries[quadrantIndex][ringIndex])
+        .data(segmentedEntries[quadrantIndex][ringIndex])
         .enter()
         .append("text")
         .attr("transform", (d, i) =>

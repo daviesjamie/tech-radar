@@ -1,4 +1,4 @@
-export function calculateRingSizes(minRadius, maxRadius, rings) {
+export function computeRings({ minRadius, maxRadius, rings }) {
   const ringSpacing = (maxRadius - minRadius) / (rings.length - 1);
   return rings.map((ring, i) => ({
     radius: minRadius + ringSpacing * i,

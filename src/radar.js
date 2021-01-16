@@ -2,47 +2,38 @@ import * as d3 from "d3";
 
 import Bubble from "./bubble";
 import { translate } from "./coordinates";
-import { initialiseEntries, numberEntries, segmentEntries } from "./entries";
-import { calculateRingSizes, drawGrid } from "./grid";
+import { computeEntries } from "./entries";
+import { computeRings, drawGrid } from "./grid";
 import Legend from "./legend";
-import Segments from "./segment";
 
 import "./radar.css";
 
-export default function D3Radar(config) {
-  const options = {
+export default function D3Radar(params) {
+  const config = {
     height: 1000,
-    minRingRadius: 130,
-    maxRingRadius: 400,
+    minRadius: 130,
+    maxRadius: 400,
     titleOffset: { x: -675, y: -420 },
     width: 1450,
-    ...config,
+    ...params,
   };
 
-  const rings = calculateRingSizes(
-    options.minRingRadius,
-    options.maxRingRadius,
-    config.rings
-  );
+  const rings = computeRings(config);
+  const entries = computeEntries({ entries: config.entries, rings });
 
-  const segments = Segments({ rings });
-
-  const entries = initialiseEntries(config.entries, segments);
-  const labelledEntries = numberEntries(segmentEntries(entries));
-
-  const svg = options.svgId
-    ? d3.select(`#${options.svgId}`)
+  const svg = config.svgId
+    ? d3.select(`#${config.svgId}`)
     : d3.select("body").append("svg");
   svg
-    .attr("width", options.width)
-    .attr("height", options.height)
+    .attr("width", config.width)
+    .attr("height", config.height)
     .classed("d3-radar", true);
 
   const radar = svg
     .append("g")
     .attr(
       "transform",
-      translate({ x: options.width / 2, y: options.height / 2 })
+      translate({ x: config.width / 2, y: config.height / 2 })
     );
 
   drawGrid(radar, rings);
@@ -50,8 +41,8 @@ export default function D3Radar(config) {
   // title
   radar
     .append("text")
-    .attr("transform", translate(options.titleOffset))
-    .text(options.title)
+    .attr("transform", translate(config.titleOffset))
+    .text(config.title)
     .classed("title", true);
 
   // layer for entries
@@ -62,21 +53,20 @@ export default function D3Radar(config) {
 
   // legend
   const legend = Legend({
-    parent: radar,
-    quadrants: config.quadrants,
-    rings,
-    entries: labelledEntries,
+    ...config,
     bubble,
+    entries,
+    parent: radar,
+    rings,
   });
 
   // draw blips on radar
   const blips = rink
     .selectAll(".blip")
-    .data(Object.values(labelledEntries).flat(2))
+    .data(entries)
     .enter()
     .append("g")
     .attr("class", "blip")
-    .attr("transform", (d, i) => legend.transform(d.quadrant, d.ring, i))
     .on("mouseover", (event, d) => {
       bubble.show(d);
       legend.highlight(d);
@@ -89,13 +79,14 @@ export default function D3Radar(config) {
   // configure each blip
   blips.each(function drawBlip(d) {
     const blip = d3.select(this);
+    blip.attr("opacity", d.opacity);
     blip.append("circle").attr("r", 9).attr("fill", d.color);
     blip.append("text").text(d.id).attr("y", 3).attr("text-anchor", "middle");
   });
 
   // distribute blips, while avoiding collisions
   d3.forceSimulation()
-    .nodes(Object.values(labelledEntries).flat(2))
+    .nodes(entries)
     .velocityDecay(0.08) // magic number (found by experimentation)
     .force("collision", d3.forceCollide().radius(12).strength(0.85))
     .on("tick", () =>

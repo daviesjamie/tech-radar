@@ -1,21 +1,5 @@
 import { Quadrant } from "./quadrants";
-
-export function initialiseEntries(entries, segments) {
-  return entries.map((entry) => {
-    const segment = segments(entry.quadrant, entry.ring);
-    const point = segment.random();
-    return {
-      ...entry,
-      color: "#000",
-      segment,
-      x: point.x,
-      y: point.y,
-    };
-  });
-  // TODO:
-  // - pass quadrants and rings through to initialiseEntries()
-  // - allow colour and opacity to be set on a per-ring, per-quadrant or per-entry basis
-}
+import Segments from "./segments";
 
 export function numberEntries(segmentedEntries, start = 1) {
   const labelOrder = [
@@ -47,4 +31,26 @@ export function segmentEntries(entries) {
     acc[entry.quadrant][entry.ring].push(entry);
     return acc;
   }, {});
+}
+
+export function computeEntries({ entries, rings }) {
+  const segmentedEntries = segmentEntries(entries);
+  const labelledEntries = numberEntries(segmentedEntries);
+  const segments = Segments({ rings });
+
+  return Object.values(labelledEntries)
+    .flat(2)
+    .map((entry) => {
+      const ring = rings[entry.ring];
+      const segment = segments(entry.quadrant, entry.ring);
+      const point = segment.random();
+
+      return {
+        color: ring.color || "#000",
+        opacity: ring.opacity || 1,
+        segment,
+        ...point,
+        ...entry,
+      };
+    });
 }
