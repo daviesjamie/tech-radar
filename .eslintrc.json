@@ -9,5 +9,6 @@
         "sourceType": "module"
     },
     "rules": {
+        "no-return-assign": ["error", "except-parens"]
     }
 }

@@ -44,18 +44,17 @@ export default function D3Radar(config) {
   const labelledEntries = {};
   [
     Quadrant.TOP_LEFT,
-    Quadrant.TOP_RIGHT,
     Quadrant.BOTTOM_LEFT,
+    Quadrant.TOP_RIGHT,
     Quadrant.BOTTOM_RIGHT,
-  ].forEach(
-    (quadrant) =>
-      (labelledEntries[quadrant] = [0, 1, 2, 3].map((ring) => {
-        const segmentEntries = segmentedEntries[quadrant][ring];
-        segmentEntries.sort((a, b) => a.label.localeCompare(b.label));
-        // eslint-disable-next-line no-plusplus
-        return segmentEntries.map((entry) => ({ ...entry, id: id++ }));
-      }))
-  );
+  ].forEach((quadrant) => {
+    labelledEntries[quadrant] = [0, 1, 2, 3].map((ring) => {
+      const segmentEntries = segmentedEntries[quadrant][ring];
+      segmentEntries.sort((a, b) => a.label.localeCompare(b.label));
+      // eslint-disable-next-line no-plusplus
+      return segmentEntries.map((entry) => ({ ...entry, id: id++ }));
+    });
+  });
 
   const svg = d3
     .select(`svg#${config.svg_id}`)
