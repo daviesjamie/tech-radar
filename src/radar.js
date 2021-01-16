@@ -2,9 +2,9 @@ import * as d3 from "d3";
 
 import Bubble from "./bubble";
 import { translate } from "./coordinates";
+import { initialiseEntries, numberEntries, segmentEntries } from "./entries";
 import { calculateRingSizes, drawGrid } from "./grid";
 import Legend from "./legend";
-import { Quadrant } from "./quadrants";
 import Segments from "./segment";
 
 import "./radar.css";
@@ -27,43 +27,8 @@ export default function D3Radar(config) {
 
   const segments = Segments({ rings });
 
-  // position each entry randomly in its segment
-  const entries = config.entries.map((entry) => {
-    const segment = segments(entry.quadrant, entry.ring);
-    const point = segment.random();
-    return {
-      ...entry,
-      color: config.rings[entry.ring].color,
-      segment,
-      x: point.x,
-      y: point.y,
-    };
-  });
-
-  // partition entries according to segments
-  const segmentedEntries = entries.reduce((acc, entry) => {
-    acc[entry.quadrant] ||= {};
-    acc[entry.quadrant][entry.ring] ||= [];
-    acc[entry.quadrant][entry.ring].push(entry);
-    return acc;
-  }, {});
-
-  // assign unique sequential id to each entry
-  let id = 1;
-  const labelledEntries = {};
-  [
-    Quadrant.TOP_LEFT,
-    Quadrant.BOTTOM_LEFT,
-    Quadrant.TOP_RIGHT,
-    Quadrant.BOTTOM_RIGHT,
-  ].forEach((quadrant) => {
-    labelledEntries[quadrant] = [0, 1, 2, 3].map((ring) => {
-      const segmentEntries = segmentedEntries[quadrant][ring];
-      segmentEntries.sort((a, b) => a.label.localeCompare(b.label));
-      // eslint-disable-next-line no-plusplus
-      return segmentEntries.map((entry) => ({ ...entry, id: id++ }));
-    });
-  });
+  const entries = initialiseEntries(config.entries, segments);
+  const labelledEntries = numberEntries(segmentEntries(entries));
 
   const svg = options.svgId
     ? d3.select(`#${options.svgId}`)
