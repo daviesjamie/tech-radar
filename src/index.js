@@ -13,9 +13,9 @@ radar({
     { name: "Languages & Frameworks", color: "#7cafc2" },
   ],
   rings: [
-    { name: "Advanced", opacity: 1 },
-    { name: "Intermediate", opacity: 0.75 },
-    { name: "Beginner", opacity: 0.5 },
+    { name: "Expert", opacity: 1 },
+    { name: "Strong", opacity: 0.75 },
+    { name: "Competent", opacity: 0.5 },
   ],
   entries,
 });

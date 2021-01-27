@@ -39,7 +39,7 @@ export function drawGrid(parent, rings) {
     grid
       .append("text")
       .text(ring.name)
-      .attr("y", -ring.radius + 62)
+      .attr("y", -ring.radius + 80)
       .attr("text-anchor", "middle")
       .classed("ring-label", true);
   });

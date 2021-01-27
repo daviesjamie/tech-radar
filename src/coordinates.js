@@ -6,8 +6,7 @@ export function toCartesian(polar) {
 }
 
 export function toPolar(cartesian) {
-  const { x } = cartesian;
-  const { y } = cartesian;
+  const { x, y } = cartesian;
   return {
     t: Math.atan2(y, x),
     r: Math.sqrt(x * x + y * y),

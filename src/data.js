@@ -3,49 +3,57 @@ const quadrants = {
   toolsAndSoftware: {
     quadrant: 0,
     rings: {
-      advanced: [
+      expert: [
         "bash",
+        "Cuckoo Sandbox",
         "git",
+        "GitHub",
+        "GitLab",
         "Makefiles",
         "tmux",
         "vim",
-        "zsh"
+        "zsh",
       ],
-      intermediate: [
-        "fzf",
-        "Screen",
+      strong: [
+        "Adobe Photoshop",
+        "MediaWiki",
+        "screen",
         "Sketch",
-        "Systemd"
+        "Unifi Controller",
       ],
-      beginner: [
-        "Figma"
+      proficient: [
+        "Adobe Illustrator",
+        "Fish shell",
+        "FreeCAD",
+        "Inkscape",
       ],
     },
   },
   dataManagement: {
     quadrant: 1,
     rings: {
-      advanced: [
+      expert: [
         "Beanstalk",
         "MySQL/MariaDB",
-        "Systemd journal"
+        "Systemd journal",
       ],
-      intermediate: [
+      strong: [
         "InfluxDB",
         "MongoDB",
         "PostgreSQL",
-        "Redis"
+        "Redis",
       ],
-      beginner: [
+      proficient: [
         "AWS S3",
-        "Elasticsearch"
+        "Elasticsearch",
+        "SwiftyBeaver",
       ],
     },
   },
   infrastructureAndHosting: {
     quadrant: 2,
     rings: {
-      advanced: [
+      expert: [
         "BIND DNS",
         "CentOS",
         "Debian",
@@ -57,27 +65,29 @@ const quadrants = {
         "Virtualbox",
         "VMWare",
       ],
-      intermediate: [
+      strong: [
         "AWS ECS",
         "Docker",
         "Drone CI",
-        "Kibana",
+        "Munin",
         "Nginx",
         "Puppet",
         "Telegraf",
         "Traefik",
         "Vagrant",
       ],
-      beginner: [
+      proficient: [
         "Ansible",
-        "Terraform"
+        "Google App Engine",
+        "Kibana",
+        "Terraform",
       ],
     },
   },
   languagesAndFrameworks: {
     quadrant: 3,
     rings: {
-      advanced: [
+      expert: [
         "Bash",
         "Flask",
         "HTML & CSS",
@@ -87,27 +97,28 @@ const quadrants = {
         "Perl",
         "Python",
         "Regular expressions",
-        "SQL::Abstract",
       ],
-      intermediate: [
-        "d3.js",
+      strong: [
+        "canvas-sketch",
         "Django",
-        "Express",
+        "Express.js",
         "Go",
         "Java",
         "JavaScript",
         "Node.js",
         "OpenAPI (Swagger)",
-        "P5.js",
         "Swift",
         "Vimscript",
         "Webpack",
       ],
-      beginner: [
+      proficient: [
+        "d3.js",
+        "go-chi",
         "Objective-C",
+        "P5.js",
         "ReactJS",
         "Ruby",
-        "TypeScript"
+        "TypeScript",
       ],
     },
   },
