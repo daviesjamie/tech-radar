@@ -1,4 +1,5 @@
-import * as d3 from "d3";
+import { forceCollide, forceSimulation } from 'd3-force';
+import { select } from 'd3-selection';
 
 import Bubble from "./bubble";
 import { translate } from "./coordinates";
@@ -23,8 +24,8 @@ export default function D3Radar(params) {
   const entries = computeEntries({ ...config, rings });
 
   const svg = config.svgId
-    ? d3.select(`#${config.svgId}`)
-    : d3.select("body").append("svg");
+    ? select(`#${config.svgId}`)
+    : select("body").append("svg");
   svg
     .attr("width", config.width)
     .attr("height", config.height)
@@ -73,17 +74,17 @@ export default function D3Radar(params) {
 
   // configure each blip
   blips.each(function drawBlip(d) {
-    const blip = d3.select(this);
+    const blip = select(this);
     blip.attr("opacity", d.opacity);
     blip.append("circle").attr("r", config.blipRadius).attr("fill", d.color);
     blip.append("text").text(d.id).attr("y", 3).attr("text-anchor", "middle");
   });
 
   // distribute blips, while avoiding collisions
-  d3.forceSimulation()
+  forceSimulation()
     .nodes(entries)
     .velocityDecay(0.08) // magic number (found by experimentation)
-    .force("collision", d3.forceCollide().radius(12).strength(0.85))
+    .force("collision", forceCollide().radius(12).strength(0.85))
     .on("tick", () =>
       blips.attr("transform", (d) =>
         translate({ x: d.segment.clipx(d), y: d.segment.clipy(d) })
