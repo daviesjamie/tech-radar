@@ -1,5 +1,6 @@
 import entries from "./data";
 import radar from "./radar";
+import "./style.css";
 
 radar({
   svgId: "radar",
