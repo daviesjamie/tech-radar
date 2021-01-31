@@ -1,5 +1,5 @@
 import entries from "./data";
-import radar from "./radar";
+import radar from "./radar/radar";
 import "./style.css";
 
 radar({
